@@ -1,4 +1,4 @@
 # CRUD Bootcamp
 
-Projeto CRUD em Java utilizando JDBC e H2 Database.
+Projeto CRUD em Java utilizando e H2 Database.
 
