@@ -3,17 +3,21 @@ package com.crud;
 import java.util.List;
 import java.util.Scanner;
 
+import com.crud.controller.UsuarioController;
 import com.crud.model.Usuario;
+import com.crud.repository.UsuarioRepositoryImpl;
+import com.crud.repository.UsuarioRepository;
 import com.crud.service.UsuarioService;
-
 
 public class Main {
 
-    private static final UsuarioService usuarioService = new UsuarioService();
+    private static final UsuarioRepository repository = new UsuarioRepositoryImpl();
+    private static final UsuarioService service = new UsuarioService(repository);
+    private static final UsuarioController controller = new UsuarioController(service);
     private static final Scanner scan = new Scanner(System.in);
 
     public static void main(String[] args) throws Exception {
-         
+
         boolean menu = true;
 
         while (menu) {
@@ -25,7 +29,7 @@ public class Main {
                 case 1:
                     salvarUsuario();
                     break;
-                case 2: 
+                case 2:
                     buscarPorId();
                     break;
                 case 3:
@@ -37,21 +41,20 @@ public class Main {
                 case 5:
                     listarUsuarios();
                     break;
-                case 0: 
+                case 0:
                     menu = false;
                     break;
-            
+
                 default:
                     System.out.println("opção inválida");
                     break;
             }
 
         }
-        
-        
+
     }
 
-    private static void mostrarMenu(){
+    private static void mostrarMenu() {
 
         System.out.println("\n===== MENU =====");
         System.out.println("1 - Criar usuário");
@@ -67,19 +70,17 @@ public class Main {
 
     private static void salvarUsuario() {
 
-        Usuario u = new Usuario();
         boolean valido = false;
 
         while (!valido) {
             System.out.println("Nome: ");
             String nome = scan.nextLine();
-            u.setNome(nome);
 
             System.out.println("Email: ");
             String email = scan.nextLine();
-            u.setEmail(email);
 
-            usuarioService.salvarUsuario(u);
+            controller.criarUsuario(nome, email);
+
             valido = true;
         }
 
@@ -88,37 +89,34 @@ public class Main {
     private static void buscarPorId() {
 
         System.out.println("Digite o ID do usuario: ");
-        Long id = scan.nextLong();
+        String idString = scan.nextLine();
 
-        Usuario usuario = usuarioService.buscarPorId(id);
+        Usuario usuario = controller.buscarPorId(idString);
+
         System.out.println("Usuário encontrado: \n");
         System.out.printf(
-            "ID: %d | Nome: %s | Email: %s",
-            usuario.getId(), usuario.getNome(), usuario.getEmail()
-        );
+                "ID: %d | Nome: %s | Email: %s\n",
+                usuario.getId(), usuario.getNome(), usuario.getEmail());
 
     }
 
     private static void atualizarUsuario() {
         System.out.println("Digite o ID do usuário a ser atualizado: ");
-        String opcao = scan.nextLine();
-        Long id = Long.parseLong(opcao);
+        String id = scan.nextLine();
 
-        Usuario u = new Usuario();
-        u.setId(id);
+        Usuario usuarioValidado = controller.buscarPorId(id);
 
         boolean valido = false;
 
         while (!valido) {
             System.out.println("Digite o novo nome: ");
             String nome = scan.nextLine();
-            u.setNome(nome);
 
             System.out.println("Digite o novo email: ");
             String email = scan.nextLine();
-            u.setEmail(email);
 
-            usuarioService.atualizarUsuario(u, id);
+            controller.atualizarUsuario(nome, email, usuarioValidado.getId());
+
             valido = true;
         }
 
@@ -126,43 +124,38 @@ public class Main {
 
     private static void excluirUsuario() {
 
-        Usuario usuarioLogado = new Usuario();
-
         System.out.println("Digite seu nome: ");
         String nome = scan.nextLine();
-        usuarioLogado.setNome(nome);
 
         System.out.println("Digite seu email: ");
         String email = scan.nextLine();
-        usuarioLogado.setEmail(email);
 
-        System.out.print("ID do usuário a excluir: ");
-        Long id = Long.valueOf(scan.nextLine());
+        controller.autenticacao(nome, email);
 
-        usuarioService.excluirUsuario(id, usuarioLogado);
+        System.out.println("ID do usuário a excluir: ");
+        String id = scan.nextLine();
+
+        controller.excluirUsuario(nome, email, id);
         System.out.println("\nUsuário excluído com sucesso!");
-        
+
     }
 
     private static void listarUsuarios() {
 
-    List<Usuario> usuarios = usuarioService.listarUsuarios();
+        List<Usuario> lista = controller.listarUsuarios();
 
-    if (usuarios.isEmpty()) {
-        System.out.println("\nNenhum usuário cadastrado.");
-        return;
+        if (lista.isEmpty()) {
+            System.out.println("\nNenhum usuário cadastrado.");
+            return;
+        }
+
+        System.out.println("\n=== LISTA DE USUÁRIOS ===");
+
+        for (Usuario u : lista) {
+            System.out.printf(
+                    "\nID: %d | Nome: %s | Email: %s\n",
+                    u.getId(), u.getNome(), u.getEmail());
+        }
     }
 
-    System.out.println("\n=== LISTA DE USUÁRIOS ===");
-
-    for (Usuario u : usuarios) {
-        System.out.printf(
-            "ID: %d | Nome: %s | Email: %s",
-            u.getId(), u.getNome(), u.getEmail()
-        );
-    }
 }
-
-}
-
-

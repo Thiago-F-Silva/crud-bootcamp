@@ -17,9 +17,10 @@ public class Usuario {
         this.id = id;
     }
 
-    public Usuario(String nome, String email) {
+    public Usuario(String nome, String email, Long id) {
         this.nome = nome;
         this.email = email;
+        this.id = id;
     }
 
     public String getNome() {

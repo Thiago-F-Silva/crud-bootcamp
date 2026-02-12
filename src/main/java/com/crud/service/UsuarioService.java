@@ -7,10 +7,10 @@ import com.crud.repository.UsuarioRepository;
 
 public class UsuarioService {
 
-    private final UsuarioRepository usuarioRepository;
+    private final UsuarioRepository repository;
 
-    public UsuarioService() {
-        this.usuarioRepository = new UsuarioRepository();
+    public UsuarioService(UsuarioRepository repository) {
+        this.repository = repository;
     }
 
     public void salvarUsuario(Usuario usuario) {
@@ -23,7 +23,7 @@ public class UsuarioService {
             throw new IllegalArgumentException("email não pode estar vazio");
         }
 
-        usuarioRepository.salvar(usuario);
+        repository.salvar(usuario);
 
     }
 
@@ -33,7 +33,7 @@ public class UsuarioService {
             throw new RuntimeException("Id inválido");
         }
 
-        Usuario usuario = usuarioRepository.buscarPorId(id);
+        Usuario usuario = repository.buscarPorId(id);
 
         if (usuario == null) {
             throw new RuntimeException("Usuario não existe");
@@ -43,15 +43,30 @@ public class UsuarioService {
 
     }
 
-    public void atualizarUsuario(Usuario usuario, Long id) {
+    public void atualizarUsuario(Usuario usuario) {
 
-        buscarPorId(id);
+        buscarPorId(usuario.getId());
 
-       if (usuario.getNome().isBlank()) {
+        if (usuario.getNome().isBlank()) {
             throw new RuntimeException("Nome não pode estar em branco");
+        } else if (usuario.getEmail().isBlank()) {
+            throw new RuntimeException("Email não pode estar vazio");
         }
 
-        usuarioRepository.atualizar(usuario);
+        repository.atualizar(usuario);
+    }
+
+    public boolean autenticacao(Usuario usuario) {
+
+            if (!"ADMINISTRADOR".equals(usuario.getNome()) && !"admin@gmail.com".equals(usuario.getEmail())) {
+
+                throw new RuntimeException("Apenas administradores podem excluir usuarios");
+            }
+
+        System.out.println("Autenticado com sucesso");
+
+        return true;
+
     }
 
     public void excluirUsuario(Long excluirId, Usuario usuario) {
@@ -63,16 +78,12 @@ public class UsuarioService {
             throw new RuntimeException("Usuario não autenticado");
         }
 
-        if (!"ADMINISTRADOR".equals(usuario.getNome()) && !"admin@gmail.com".equals(usuario.getEmail())) {
-            throw new RuntimeException("Apenas administradores podem excluir usuarios");
-        }
-
-        usuarioRepository.deletar(excluirId);
+        repository.deletar(excluirId);
 
     }
 
     public List<Usuario> listarUsuarios() {
-        return usuarioRepository.listarUsuarios();
+        return repository.listarUsuarios();
     }
 
 }
