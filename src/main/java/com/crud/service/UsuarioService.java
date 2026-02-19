@@ -17,14 +17,11 @@ public class UsuarioService {
 
         if (usuario == null) {
             throw new IllegalArgumentException("Usuario não pode ser nulo");
-        } 
-        else if (usuario.getNome().isBlank()) {
+        } else if (usuario.getNome().isBlank()) {
             throw new IllegalArgumentException("Nome não pode estar vazio");
-        } 
-        else if (!usuario.getNome().matches("[a-zA-ZÀ-ÿ]+")) {
-            throw  new IllegalArgumentException("Nome deve conter apenas letras");
-        } 
-        else if (usuario.getEmail().isBlank()) {
+        } else if (!usuario.getNome().matches("[a-zA-ZÀ-ÿ ]+")) {
+            throw new IllegalArgumentException("Nome deve conter apenas letras");
+        } else if (usuario.getEmail().isBlank()) {
             throw new IllegalArgumentException("email não pode estar vazio");
         }
 
@@ -48,6 +45,15 @@ public class UsuarioService {
 
     }
 
+    public Usuario buscarPorNomeEmail(String nome, String email) {
+        Usuario usuario = repository.buscarPorNomeEmail(nome, email);
+        if (usuario == null) {
+            System.out.println("Usuario não existe");
+            return null;
+        }
+        return usuario;
+    }
+
     public void atualizarUsuario(Usuario usuario) {
 
         buscarPorId(usuario.getId());
@@ -63,10 +69,10 @@ public class UsuarioService {
 
     public boolean autenticacao(Usuario usuario) {
 
-            if (!"ADMINISTRADOR".equals(usuario.getNome()) && !"admin@gmail.com".equals(usuario.getEmail())) {
+        if (!"ADMINISTRADOR".equals(usuario.getNome()) && !"admin@gmail.com".equals(usuario.getEmail())) {
 
-                throw new RuntimeException("Apenas administradores podem excluir usuarios");
-            }
+            throw new RuntimeException("Apenas administradores podem excluir usuarios");
+        }
 
         System.out.println("Autenticado com sucesso");
 
@@ -79,7 +85,7 @@ public class UsuarioService {
         if (id <= 0) {
             throw new RuntimeException("ID inválido");
 
-        } 
+        }
 
         Usuario usuario = buscarPorId(id);
 

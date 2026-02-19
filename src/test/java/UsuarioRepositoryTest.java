@@ -24,5 +24,7 @@ public class UsuarioRepositoryTest implements UsuarioRepository {
 
     @Override
     public void deletar(Long id) {}
+
+    public Usuario buscarPorNomeEmail(String nome, String email) {return null;}
     
 }
