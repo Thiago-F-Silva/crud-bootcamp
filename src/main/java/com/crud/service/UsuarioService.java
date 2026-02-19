@@ -74,16 +74,16 @@ public class UsuarioService {
 
     }
 
-    public void excluirUsuario(Long excluirId, Usuario usuario) {
+    public void excluirUsuario(Long id) {
 
-        if (excluirId <= 0) {
+        if (id <= 0) {
             throw new RuntimeException("ID inválido");
 
-        } else if (usuario == null) {
-            throw new RuntimeException("Usuario não autenticado");
-        }
+        } 
 
-        repository.deletar(excluirId);
+        Usuario usuario = buscarPorId(id);
+
+        repository.deletar(id);
 
     }
 

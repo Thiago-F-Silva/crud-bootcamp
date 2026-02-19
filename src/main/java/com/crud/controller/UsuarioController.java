@@ -60,7 +60,7 @@ public class UsuarioController {
 
         Usuario u = new Usuario(nome, email, id);
 
-        service.excluirUsuario(id, u);
+        service.excluirUsuario(id);
 
     }
 
