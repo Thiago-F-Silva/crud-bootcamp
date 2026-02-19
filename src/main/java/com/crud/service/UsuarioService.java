@@ -17,9 +17,14 @@ public class UsuarioService {
 
         if (usuario == null) {
             throw new IllegalArgumentException("Usuario não pode ser nulo");
-        } else if (usuario.getNome().isBlank()) {
+        } 
+        else if (usuario.getNome().isBlank()) {
             throw new IllegalArgumentException("Nome não pode estar vazio");
-        } else if (usuario.getEmail().isBlank()) {
+        } 
+        else if (!usuario.getNome().matches("[a-zA-ZÀ-ÿ]+")) {
+            throw  new IllegalArgumentException("Nome deve conter apenas letras");
+        } 
+        else if (usuario.getEmail().isBlank()) {
             throw new IllegalArgumentException("email não pode estar vazio");
         }
 
