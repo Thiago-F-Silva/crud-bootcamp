@@ -31,6 +31,12 @@ public class UsuarioController {
         return service.buscarPorId(id);
     }
 
+    public Usuario buscarPorNomeEmail(String nome, String email){
+
+        return service.buscarPorNomeEmail(nome, email);
+
+    }
+
     public void atualizarUsuario(String nome, String email, Long id) {
 
         Usuario u = new Usuario(nome, email, id);

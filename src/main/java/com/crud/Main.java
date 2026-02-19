@@ -30,7 +30,7 @@ public class Main {
                     salvarUsuario();
                     break;
                 case 2:
-                    buscarPorId();
+                    menuBuscarUsuario();
                     break;
                 case 3:
                     atualizarUsuario();
@@ -58,13 +58,37 @@ public class Main {
 
         System.out.println("\n===== MENU =====");
         System.out.println("1 - Criar usuário");
-        System.out.println("2 - Buscar usuário por ID");
+        System.out.println("2 - Buscar usuário");
         System.out.println("3 - Atualizar usuário");
         System.out.println("4 - Excluir usuário");
         System.out.println("5 - Listar usuários");
         System.out.println("0 - Sair");
         System.out.println("================\n");
         System.out.print("Escolha uma opção: ");
+
+    }
+
+    private static void menuBuscarUsuario(){
+
+        System.out.println("\n===== MENU =====");
+        System.out.println("1 - Buscar por ID");
+        System.out.println("2 - Buscar por nome e email");
+        System.out.println("================\n");
+        System.out.print("Escolha uma opção: ");
+
+        String opcao = scan.nextLine();
+        int input = Integer.parseInt(opcao);
+
+        switch (input) {
+            case 1:
+                buscarPorId();
+                break;
+            case 2:
+                buscarPorNomeEmail();
+                break;
+            default:
+                throw new AssertionError();
+        }
 
     }
 
@@ -92,6 +116,22 @@ public class Main {
         String idString = scan.nextLine();
 
         Usuario usuario = controller.buscarPorId(idString);
+
+        System.out.println("Usuário encontrado: \n");
+        System.out.printf(
+                "ID: %d | Nome: %s | Email: %s\n",
+                usuario.getId(), usuario.getNome(), usuario.getEmail());
+
+    }
+
+    private static void buscarPorNomeEmail(){
+        System.out.println("Digite o nome do usuario");
+        String nome = scan.nextLine();
+
+        System.out.println("Digite o email do usuario");
+        String email = scan.nextLine();
+
+        Usuario usuario = controller.buscarPorNomeEmail(nome, email);
 
         System.out.println("Usuário encontrado: \n");
         System.out.printf(

@@ -7,6 +7,7 @@ import com.crud.model.Usuario;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.TypedQuery;
 
@@ -39,8 +40,7 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
     @Override
     public void salvar(Usuario usuario) {
 
-        EntityManagerFactory managerFactory = Persistence.createEntityManagerFactory("crudBootcampJava");
-        EntityManager manager = managerFactory.createEntityManager();
+        EntityManager manager = JPAUtil.getEntityManager();
 
             manager.getTransaction().begin();
             manager.persist(usuario);
@@ -70,13 +70,34 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
 
         EntityManager manager = JPAUtil.getEntityManager();
 
-        manager.getTransaction().begin();
         Usuario usuario = manager.find(Usuario.class, id);
-        manager.getTransaction().commit();
+
         manager.close();
 
         return usuario;
             
+    }
+
+    @Override
+    public Usuario buscarPorNomeEmail(String nome, String email){
+
+        EntityManager manager = JPAUtil.getEntityManager();
+
+        try {
+        TypedQuery<Usuario> query = manager.createQuery(
+            "SELECT u FROM Usuario u WHERE u.nome LIKE :nome AND u.email = :email", 
+            Usuario.class
+        );
+        
+        query.setParameter("nome", "%" + nome + "%");
+        query.setParameter("email", email);
+        
+        return query.getSingleResult();
+        
+    } catch (NoResultException e) {
+        System.out.println("Nenhum usuario encontrado");
+        return null;
+    }
 
     }
 
