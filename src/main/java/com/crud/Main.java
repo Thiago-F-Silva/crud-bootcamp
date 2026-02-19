@@ -16,7 +16,7 @@ public class Main {
     private static final UsuarioController controller = new UsuarioController(service);
     private static final Scanner scan = new Scanner(System.in);
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
 
         boolean menu = true;
 
