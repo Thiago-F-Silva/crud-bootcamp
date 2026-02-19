@@ -5,8 +5,8 @@ import java.util.Scanner;
 
 import com.crud.controller.UsuarioController;
 import com.crud.model.Usuario;
-import com.crud.repository.UsuarioRepositoryImpl;
 import com.crud.repository.UsuarioRepository;
+import com.crud.repository.UsuarioRepositoryImpl;
 import com.crud.service.UsuarioService;
 
 public class Main {
@@ -82,7 +82,7 @@ public class Main {
             controller.criarUsuario(nome, email);
 
             valido = true;
-        }
+        } 
 
     }
 
