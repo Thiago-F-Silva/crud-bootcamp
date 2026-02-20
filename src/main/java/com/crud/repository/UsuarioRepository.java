@@ -11,5 +11,5 @@ public interface UsuarioRepository {
     Usuario buscarPorId(Long id);
     void atualizar(Usuario usuario);
     void deletar(Long id);
-    
+    Usuario buscarPorNomeEmail(String nome, String email);
 }
