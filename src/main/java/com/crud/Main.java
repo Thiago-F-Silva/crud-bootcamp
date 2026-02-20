@@ -8,7 +8,10 @@ import com.crud.model.Usuario;
 import com.crud.repository.UsuarioRepositoryImpl;
 import com.crud.repository.UsuarioRepository;
 import com.crud.service.UsuarioService;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+@SpringBootApplication
 public class Main {
 
     private static final UsuarioRepository repository = new UsuarioRepositoryImpl();
@@ -17,6 +20,7 @@ public class Main {
     private static final Scanner scan = new Scanner(System.in);
 
     public static void main(String[] args) {
+        SpringApplication.run(Main.class, args);
 
         boolean menu = true;
 
