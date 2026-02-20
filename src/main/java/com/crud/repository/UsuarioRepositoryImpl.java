@@ -1,146 +1,133 @@
 package com.crud.repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.List;
 
-import com.crud.connection.ConexaoH2;
+import com.crud.conexaoJPA.JPAUtil;
 import com.crud.model.Usuario;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Persistence;
+import jakarta.persistence.TypedQuery;
 
 public class UsuarioRepositoryImpl implements UsuarioRepository {
     
     public UsuarioRepositoryImpl (){
-        criarTabela();
+        // criarTabela();
     }
 
-    private void criarTabela() {
+    // private void criarTabela() {
 
-        String sql = """
-                CREATE TABLE IF NOT EXISTS usuarios (
-                id IDENTITY PRIMARY KEY,
-                nome VARCHAR(100) NOT NULL,
-                email VARCHAR(100) NOT NULL
-                )
-                """;
+    //     String sql = """
+    //             CREATE TABLE IF NOT EXISTS usuarios (
+    //             id IDENTITY PRIMARY KEY,
+    //             nome VARCHAR(100) NOT NULL,
+    //             email VARCHAR(100) NOT NULL
+    //             )
+    //             """;
 
-                try (Connection conn = ConexaoH2.getConnection(); 
-                PreparedStatement statement = conn.prepareStatement(sql)){
+    //             try (Connection conn = ConexaoH2.getConnection(); 
+    //             PreparedStatement statement = conn.prepareStatement(sql)){
                     
-                    statement.execute();
+    //                 statement.execute();
 
-                } catch (Exception e) {
-                    throw new RuntimeException("Erro ao criar tabela usuario", e);
-                }
-    }
+    //             } catch (Exception e) {
+    //                 throw new RuntimeException("Erro ao criar tabela usuario", e);
+    //             }
+    // }
 
     @Override
     public void salvar(Usuario usuario) {
-        String sql = "INSERT INTO usuarios (nome, email) VALUES (?, ?)";
 
-        try (Connection conn = ConexaoH2.getConnection(); 
-            PreparedStatement statement = conn.prepareStatement(sql)){
+        EntityManager manager = JPAUtil.getEntityManager();
 
-                statement.setString(1, usuario.getNome());
-                statement.setString(2, usuario.getEmail());
-                statement.executeUpdate();
+            manager.getTransaction().begin();
+            manager.persist(usuario);
+            manager.getTransaction().commit();
+            manager.close();
 
-                System.out.println("Usuario salvo com sucesso");
-            
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao tentar salvar usuario", e);
-        }
+            System.out.println("Usuario salvo com sucesso");
+ 
 
     }
 
     @Override
     public List<Usuario> listarUsuarios() {
-        List<Usuario> usuarios = new ArrayList<>();
-        String sql = "SELECT * FROM usuarios";
 
-        try (Connection conn = ConexaoH2.getConnection(); 
-            PreparedStatement statement = conn.prepareStatement(sql);
-            ResultSet resultSet = statement.executeQuery()) {
+        EntityManager manager = JPAUtil.getEntityManager();
 
-                while (resultSet.next()) {
-                    Usuario u = new Usuario();
-                    u.setNome(resultSet.getString("nome"));
-                    u.setId(resultSet.getLong("id"));
-                    u.setEmail(resultSet.getString("email"));
+        TypedQuery<Usuario> query = manager.createQuery("SELECT u FROM Usuario u", Usuario.class);
+        List<Usuario> list = query.getResultList();
+        manager.close();
 
-                    usuarios.add(u);
-                }
-            
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao listar usuarios", e);
-        }
 
-        return usuarios;
+        return list;
     }
 
     @Override
     public Usuario buscarPorId(Long id) {
-        String sql = "SELECT * FROM usuarios WHERE id = ?";
 
-        try (Connection conn = ConexaoH2.getConnection();
-            PreparedStatement statement = conn.prepareStatement(sql)){
+        EntityManager manager = JPAUtil.getEntityManager();
 
-                statement.setLong(1, id);
-                ResultSet resultSet = statement.executeQuery();
+        Usuario usuario = manager.find(Usuario.class, id);
 
-                if (resultSet.next()) {
-                    Usuario u = new Usuario();
-                    u.setId(resultSet.getLong("id"));
-                    u.setNome(resultSet.getString("nome"));
-                    u.setEmail(resultSet.getString("email"));
-                    return u;
-                }
+        manager.close();
 
-                return null;
+        return usuario;
             
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao buscar id", e);
-        }
+    }
+
+    @Override
+    public Usuario buscarPorNomeEmail(String nome, String email){
+
+        EntityManager manager = JPAUtil.getEntityManager();
+
+        try {
+        TypedQuery<Usuario> query = manager.createQuery(
+            "SELECT u FROM Usuario u WHERE u.nome LIKE :nome AND u.email = :email", 
+            Usuario.class
+        );
+        
+        query.setParameter("nome", "%" + nome + "%");
+        query.setParameter("email", email);
+        
+        return query.getSingleResult();
+        
+    } catch (NoResultException e) {
+        System.out.println("Nenhum usuario encontrado");
+        return null;
+    }
 
     }
 
     @Override
     public void atualizar(Usuario usuario){
 
-        String sql = "UPDATE usuarios SET nome = ?, email = ? WHERE id = ?";
+        EntityManagerFactory managerFactory = Persistence.createEntityManagerFactory("crudBootcampJava");
+        EntityManager manager = managerFactory.createEntityManager();
 
-        try (Connection conn = ConexaoH2.getConnection(); 
-            PreparedStatement statement = conn.prepareStatement(sql)){
+        manager.getTransaction().begin();
 
-                statement.setString(1, usuario.getNome());
-                statement.setString(2, usuario.getEmail());
-                statement.setLong(3, usuario.getId());
+        manager.merge(usuario);
 
-                statement.executeUpdate();
-                System.out.println("Usuario atualizado com sucesso");
-            
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao atualizar usuario", e);
-        }
+        manager.getTransaction().commit();
+        manager.close();
 
     }
 
     @Override
     public void deletar(Long id){
 
-        String sql = "DELETE FROM usuarios WHERE id = ?";
+        EntityManagerFactory managerFactory = Persistence.createEntityManagerFactory("crudBootcampJava");
+        EntityManager manager = managerFactory.createEntityManager();
 
-        try (Connection conn = ConexaoH2.getConnection();
-            PreparedStatement statement = conn.prepareStatement(sql)) {
+        Usuario usuario = manager.find(Usuario.class, id);
 
-                statement.setLong(1, id);
-                statement.executeUpdate();
-
-            
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao deletar usuario", e);
-        }
+        manager.getTransaction().begin();
+        manager.remove(usuario);
+        manager.getTransaction().commit();
+        
     }
 
 }
