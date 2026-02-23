@@ -5,22 +5,25 @@ import java.util.Scanner;
 
 import com.crud.controller.UsuarioController;
 import com.crud.model.Usuario;
-import com.crud.repository.UsuarioRepository;
-import com.crud.repository.UsuarioRepositoryImpl;
-import com.crud.service.UsuarioService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class Main {
+public class Main implements CommandLineRunner {
 
-    private static final UsuarioRepository repository = new UsuarioRepositoryImpl();
-    private static final UsuarioService service = new UsuarioService(repository);
-    private static final UsuarioController controller = new UsuarioController(service);
     private static final Scanner scan = new Scanner(System.in);
+
+    @Autowired
+    private UsuarioController controller;
 
     public static void main(String[] args) {
         SpringApplication.run(Main.class, args);
+    }
+
+    public void run(String... args) {
 
         boolean menu = true;
 
@@ -58,7 +61,7 @@ public class Main {
 
     }
 
-    private static void mostrarMenu() {
+    private void mostrarMenu() {
 
         System.out.println("\n===== MENU =====");
         System.out.println("1 - Criar usuário");
@@ -72,7 +75,7 @@ public class Main {
 
     }
 
-    private static void menuBuscarUsuario(){
+    private void menuBuscarUsuario() {
 
         System.out.println("\n===== MENU =====");
         System.out.println("1 - Buscar por ID");
@@ -96,7 +99,7 @@ public class Main {
 
     }
 
-    private static void salvarUsuario() {
+    private void salvarUsuario() {
 
         boolean valido = false;
 
@@ -110,16 +113,16 @@ public class Main {
             controller.criarUsuario(nome, email);
 
             valido = true;
-        } 
+        }
 
     }
 
-    private static void buscarPorId() {
+    private void buscarPorId() {
 
         System.out.println("Digite o ID do usuario: ");
         String idString = scan.nextLine();
 
-        Usuario usuario = controller.buscarPorId(idString);
+        Usuario usuario = controller.buscarPorId(idString).orElseThrow(() -> new RuntimeException());
 
         System.out.println("Usuário encontrado: \n");
         System.out.printf(
@@ -128,7 +131,7 @@ public class Main {
 
     }
 
-    private static void buscarPorNomeEmail(){
+    private void buscarPorNomeEmail() {
         System.out.println("Digite o nome do usuario");
         String nome = scan.nextLine();
 
@@ -144,11 +147,11 @@ public class Main {
 
     }
 
-    private static void atualizarUsuario() {
+    private void atualizarUsuario() {
         System.out.println("Digite o ID do usuário a ser atualizado: ");
         String id = scan.nextLine();
 
-        Usuario usuarioValidado = controller.buscarPorId(id);
+        Usuario usuarioValidado = controller.buscarPorId(id).orElseThrow(() -> new RuntimeException());
 
         boolean valido = false;
 
@@ -166,7 +169,7 @@ public class Main {
 
     }
 
-    private static void excluirUsuario() {
+    private void excluirUsuario() {
 
         System.out.println("Digite seu nome: ");
         String nome = scan.nextLine();
@@ -179,12 +182,12 @@ public class Main {
         System.out.println("ID do usuário a excluir: ");
         String id = scan.nextLine();
 
-        controller.excluirUsuario(nome, email, id);
+        controller.excluirUsuario(id);
         System.out.println("\nUsuário excluído com sucesso!");
 
     }
 
-    private static void listarUsuarios() {
+    private void listarUsuarios() {
 
         List<Usuario> lista = controller.listarUsuarios();
 

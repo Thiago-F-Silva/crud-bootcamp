@@ -1,13 +1,20 @@
 package com.crud.service;
 
 import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 
 import com.crud.model.Usuario;
 import com.crud.repository.UsuarioRepository;
 
+@Component
 public class UsuarioService {
 
-    private final UsuarioRepository repository;
+    @Autowired
+    private UsuarioRepository repository;
 
     public UsuarioService(UsuarioRepository repository) {
         this.repository = repository;
@@ -25,17 +32,17 @@ public class UsuarioService {
             throw new IllegalArgumentException("email não pode estar vazio");
         }
 
-        repository.salvar(usuario);
+        repository.save(usuario);
 
     }
 
-    public Usuario buscarPorId(Long id) {
+    public Optional<Usuario> buscarPorId(Long id) {
 
         if (id <= 0) {
             throw new RuntimeException("Id inválido");
         }
 
-        Usuario usuario = repository.buscarPorId(id);
+        Optional<Usuario> usuario = repository.findById(id);
 
         if (usuario == null) {
             throw new RuntimeException("Usuario não existe");
@@ -46,7 +53,7 @@ public class UsuarioService {
     }
 
     public Usuario buscarPorNomeEmail(String nome, String email) {
-        Usuario usuario = repository.buscarPorNomeEmail(nome, email);
+        Usuario usuario = repository.findByNomeContainingAndEmail(nome, email);
         if (usuario == null) {
             System.out.println("Usuario não existe");
             return null;
@@ -64,12 +71,12 @@ public class UsuarioService {
             throw new RuntimeException("Email não pode estar vazio");
         }
 
-        repository.atualizar(usuario);
+        repository.save(usuario);
     }
 
     public boolean autenticacao(Usuario usuario) {
 
-        if (!"ADMINISTRADOR".equals(usuario.getNome()) && !"admin@gmail.com".equals(usuario.getEmail())) {
+        if (!"ADMINISTRADOR".equals(usuario.getNome()) || !"admin@gmail.com".equals(usuario.getEmail())) {
 
             throw new RuntimeException("Apenas administradores podem excluir usuarios");
         }
@@ -87,14 +94,14 @@ public class UsuarioService {
 
         }
 
-        Usuario usuario = buscarPorId(id);
+        Usuario usuario = buscarPorId(id).orElseThrow(() -> new RuntimeException("Usuario não encontrado"));
 
-        repository.deletar(id);
+        repository.delete(usuario);
 
     }
 
     public List<Usuario> listarUsuarios() {
-        return repository.listarUsuarios();
+        return repository.findAll();
     }
 
 }
