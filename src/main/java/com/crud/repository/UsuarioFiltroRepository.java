@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import com.crud.model.Usuario;
 
 @Repository
-public interface UsuarioRepository extends JpaRepository<Usuario, Long>{
-
-    public boolean existsByEmail(String email);
+public interface UsuarioFiltroRepository extends JpaRepository<Usuario, Long> {
+    
+    Usuario findByNomeContainingAndEmail(String nome, String email);
 }

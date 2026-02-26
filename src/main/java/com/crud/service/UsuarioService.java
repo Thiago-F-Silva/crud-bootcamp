@@ -6,8 +6,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
 import com.crud.model.Usuario;
+import com.crud.repository.UsuarioFiltroRepository;
 import com.crud.repository.UsuarioRepository;
 
 @Component
@@ -16,25 +16,40 @@ public class UsuarioService {
     @Autowired
     private UsuarioRepository repository;
 
-    public UsuarioService(UsuarioRepository repository) {
-        this.repository = repository;
-    }
+    @Autowired
+    private UsuarioFiltroRepository filtroRepository;
 
     public void salvarUsuario(Usuario usuario) {
 
-        if (usuario == null) {
-            throw new IllegalArgumentException("Usuario não pode ser nulo");
-        } else if (usuario.getNome().isBlank()) {
-            throw new IllegalArgumentException("Nome não pode estar vazio");
-        } else if (!usuario.getNome().matches("[a-zA-ZÀ-ÿ ]+")) {
-            throw new IllegalArgumentException("Nome deve conter apenas letras");
-        } else if (usuario.getEmail().isBlank()) {
-            throw new IllegalArgumentException("email não pode estar vazio");
-        }
-
+        validarUsuario(usuario);
+        validarEmail(usuario.getEmail());
+        validarNome(usuario.getNome());
         repository.save(usuario);
 
     }
+
+    public void validarEmail(String email) { 
+
+        if (email.isBlank() || !email.contains("@")) {
+            throw new IllegalArgumentException("Entrada de email inválida");
+        }
+
+    }
+
+    public void validarNome(String nome) {
+
+        if (nome.isBlank() || !nome.matches("[a-zA-ZÀ-ÿ ]+")) {
+            throw new IllegalArgumentException("Entrada de nome inválida");
+        }
+
+    }
+
+    public void validarUsuario(Usuario usuario) {
+        if (usuario == null) {
+            throw new IllegalArgumentException("Entrada de usuário inválida");
+        }
+    }
+
 
     public Optional<Usuario> buscarPorId(Long id) {
 
@@ -53,7 +68,7 @@ public class UsuarioService {
     }
 
     public Usuario buscarPorNomeEmail(String nome, String email) {
-        Usuario usuario = repository.findByNomeContainingAndEmail(nome, email);
+        Usuario usuario = filtroRepository.findByNomeContainingAndEmail(nome, email);
         if (usuario == null) {
             System.out.println("Usuario não existe");
             return null;
@@ -92,9 +107,11 @@ public class UsuarioService {
         if (id <= 0) {
             throw new RuntimeException("ID inválido");
 
-        }
+        } 
 
         Usuario usuario = buscarPorId(id).orElseThrow(() -> new RuntimeException("Usuario não encontrado"));
+
+        
 
         repository.delete(usuario);
 
