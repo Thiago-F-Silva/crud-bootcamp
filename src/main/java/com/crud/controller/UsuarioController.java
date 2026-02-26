@@ -4,30 +4,29 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.crud.model.Usuario;
 import com.crud.service.UsuarioService;
 
-@Component
+
+@RestController
+@RequestMapping("/usuarios")
 public class UsuarioController {
 
     @Autowired
     private UsuarioService service;
 
-    public UsuarioController(UsuarioService service) {
-        this.service = service;
-    }
-
-    public void criarUsuario(String nome, String email) {
-
-        Usuario u = new Usuario();
-
-        u.setNome(nome);
-        u.setEmail(email);
-
-        service.salvarUsuario(u);
-
+    @PostMapping
+    public void criarUsuario(@RequestBody Usuario usuario) {
+        service.salvarUsuario(usuario); 
     }
 
     public Optional<Usuario> buscarPorId(String idString) {
@@ -43,12 +42,10 @@ public class UsuarioController {
 
     }
 
-    public void atualizarUsuario(String nome, String email, Long id) {
-
-        Usuario u = new Usuario(nome, email, id);
-
-        service.atualizarUsuario(u);
-
+    @PutMapping("/{id}")
+    public void atualizarUsuario(@PathVariable("id") Long id, @RequestBody Usuario usuario) {
+        usuario.setId(id);
+        service.atualizarUsuario(usuario);
     }
 
     public boolean autenticacao(String nome, String email) {
@@ -62,14 +59,12 @@ public class UsuarioController {
 
     }
 
-    public void excluirUsuario(String idString) {
-
-        Long id = Long.parseLong(idString);
-
+    @DeleteMapping("/{id}")
+    public void excluirUsuario(@PathVariable("id") Long id) {
         service.excluirUsuario(id);
-
     }
 
+    @GetMapping
     public List<Usuario> listarUsuarios() {
         return service.listarUsuarios();
     }

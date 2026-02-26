@@ -19,10 +19,6 @@ public class UsuarioService {
     @Autowired
     private UsuarioFiltroRepository filtroRepository;
 
-    public UsuarioService(UsuarioRepository repository) {
-        this.repository = repository;
-    }
-
     public void salvarUsuario(Usuario usuario) {
 
         validarUsuario(usuario);
