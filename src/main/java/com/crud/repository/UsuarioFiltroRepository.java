@@ -7,6 +7,5 @@ import com.crud.model.Usuario;
 
 @Repository
 public interface UsuarioFiltroRepository extends JpaRepository<Usuario, Long> {
-    
     Usuario findByNomeContainingAndEmail(String nome, String email);
 }
