@@ -93,12 +93,36 @@
         <button class="btn btn-primary" onclick="salvar()">Criar</button>
     </div>
     <div class="container-content">
+        <div class="container-filtro">
+            <button class="btn btn-info" onclick="buscarPorId()">Filtrar por ID</button>
+            
+            <div id="campoBusca" style="display:none;" class="mb-3">
+                <input type="text" id="inputFiltrarId" placeholder="Digite o ID" style="width: 200px; padding: 6px; border-radius: 6px; border: 1px solid #ccc;">
+                <button class="btn btn-info btn-sm ms-2" onclick="filtrarPorID()">Buscar</button>
+                <button class="btn btn-secondary btn-sm ms-2" onclick="limparBuscaID()">Limpar</button>
+                <a class="btn btn-link ms-4" onclick="showFiltrarPorNomeeEmail(); buscarPorId()">Não sei o ID</a>
+            </div>
+            
+        </div>
+        <div id="campoBuscaNomeeEmail" style="display:none;" class="mt-3">
+            <div class="mb-2">
+                <label>Nome</label>
+                <input type="text" id="inputBuscarNome">
+            </div>
+            <div class="mb-2">
+                <label>Email</label>
+                <input type="text" id="inputBuscarEmail">
+            </div>
+            <button class="btn btn-info btn-sm" onclick="filtrarPorNomeeEmail()">Buscar</button>
+            <button class="btn btn-secondary btn-sm ms-2" onclick="limparBuscaNomeEmail()">Limpar</button>
+        </div>
         <table class="table table-bordered mt-4">
             <thead class="table-success">
                 <tr>
                     <th>ID</th>
                     <th>Nome</th>
                     <th>Email</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody id="tabela"></tbody>
@@ -107,10 +131,10 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const URL = '/usuarios';
+        const API_URL = '/usuarios';
 
         async function carregar() {
-            const res = await fetch(URL);
+            const res = await fetch(API_URL);
             const usuarios = await res.json();
 
             const tabela = document.getElementById('tabela');
@@ -137,13 +161,13 @@
             const email = document.getElementById('inputEmail').value;
 
             if (id) {
-                await fetch(`${URL}/${id}`, {
+                await fetch(`${API_URL}/${id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id, nome, email })
                 });
             } else {
-                await fetch(URL, {
+                await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nome, email })
@@ -161,19 +185,108 @@
             document.getElementById('inputEmail').value = email;
         }
 
-        async function excluir(id) {
-            if (confirm('Deseja excluir este usuário?')) {
-                await fetch(`${URL}/${id}`, { method: 'DELETE' });
-                carregar();
-            }
+        function excluir(id) {
+            window.location.href = `/auth.html?id=${id}`;
         }
-
-        // Limpar formulário
         function limparForm() {
             document.getElementById('formTitulo').textContent = 'Novo Usuário';
             document.getElementById('userId').value = '';
             document.getElementById('inputNome').value = '';
             document.getElementById('inputEmail').value = '';
+        }
+
+        function buscarPorId() {
+            const campo = document.getElementById('campoBusca');
+
+            if (campo.style.display === 'none') {
+                campo.style.display = 'block';
+            } else {
+                campo.style.display = 'none';
+            }
+        }
+
+        async function filtrarPorID() {
+            const id = document.getElementById('inputFiltrarId').value;
+
+            if (!id) {
+                alert('Digite um ID');
+                return;
+            }
+
+            const res = await fetch(`${API_URL}/${id}`);
+
+            if (res.ok) {
+                const usuario = await res.json();
+                const tabela = document.getElementById('tabela');
+                tabela.innerHTML = `
+                    <tr>
+                        <td>${usuario.id}</td>
+                        <td>${usuario.nome}</td>
+                        <td>${usuario.email}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="editar(${usuario.id}, '${usuario.nome}', '${usuario.email}')">Editar</button>
+                            <button class="btn btn-danger btn-sm" onclick="excluir(${usuario.id})">Excluir</button>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                alert('Usuário não encontrado');
+            }
+        }
+
+        function showFiltrarPorNomeeEmail() {
+            const campo = document.getElementById('campoBuscaNomeeEmail');
+            if (campo.style.display === 'none') {
+                campo.style.display = 'block';
+            } else {
+                campo.style.display = 'none';
+                carregar();
+            }
+        }
+
+        async function filtrarPorNomeeEmail() {
+
+            const nome = document.getElementById('inputBuscarNome').value;
+            const email = document.getElementById('inputBuscarEmail').value;
+
+            if (!nome || !email) {
+                alert('Preencha nome e email');
+                return;
+            }
+
+            const res = await fetch(`${API_URL}/buscar?nome=${nome}&email=${email}`);
+
+            if (res.ok) {
+                const usuario = await res.json();
+                const tabela = document.getElementById('tabela');
+                tabela.innerHTML = `
+                    <tr>
+                        <td>${usuario.id}</td>
+                        <td>${usuario.nome}</td>
+                        <td>${usuario.email}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="editar(${usuario.id}, '${usuario.nome}', '${usuario.email}')">Editar</button>
+                            <button class="btn btn-danger btn-sm" onclick="excluir(${usuario.id})">Excluir</button>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                alert('Usuário não encontrado');
+                document.getElementById('resultadoBusca').style.display = 'none';
+            }
+        }
+
+        function limparBuscaNomeEmail(){
+            document.getElementById('inputBuscarNome').value = '';
+            document.getElementById('inputBuscarEmail').value = '';
+            document.getElementById('campoBuscaNomeeEmail').style.display = 'none';
+            carregar();
+        }
+
+        function limparBuscaID() {
+            document.getElementById('inputFiltrarId').value = '';
+            document.getElementById('campoBusca').style.display = 'none';
+            carregar();
         }
 
         carregar();

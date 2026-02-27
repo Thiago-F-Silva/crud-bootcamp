@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crud.model.Usuario;
@@ -31,13 +32,13 @@ public class UsuarioController {
     }
 
     @GetMapping("/{id}")
-    public Optional<Usuario> buscarPorId(@PathVariable Long id) {
+    public Optional<Usuario> buscarPorId(@PathVariable("id") Long id) {
         return service.buscarPorId(id);
     }
 
     @GetMapping("/buscar")
-    public Usuario buscarPorNomeEmail(@RequestBody Usuario usuario) {
-        return service.buscarPorNomeEmail(usuario.getNome(), usuario.getEmail());
+    public Usuario buscarPorNomeEmail(@RequestParam("nome") String nome, @RequestParam("email") String email) {
+        return service.buscarPorNomeEmail(nome, email);
 
     }
 
@@ -47,10 +48,14 @@ public class UsuarioController {
         service.atualizarUsuario(usuario);
     }
 
-    @PostMapping("/autenticar")
-    public boolean autenticacao(@RequestBody Usuario usuario) {
-        return service.autenticacao(usuario);
+    @GetMapping("/autenticar")
+    public ResponseEntity<Void> autenticacao(@RequestParam("nome") String nome, @RequestParam("email") String email) {
+        boolean autenticacao = service.autenticacao(new Usuario(nome, email, null));
+            if (autenticacao) {
+                return ResponseEntity.ok().build();
+            }
 
+            return ResponseEntity.status(403).build();
     }
 
     @DeleteMapping("/{id}")
